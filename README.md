@@ -21,7 +21,16 @@ That's it. Claude will pick up the skill automatically.
 
 ## Why this exists
 
-drupal.org returns 403 to direct page fetches, so Claude can't read issue pages with its built-in tools. This skill provides scripts that use the drupal.org JSON API and git.drupalcode.org GitLab API instead. No external dependencies, just Python 3.8+.
+As of April 2026, Claude can read drupal.org pages directly (claudebot was [unblocked with rate limiting](https://www.drupal.org/project/infrastructure/issues/3557316)). This skill adds structured, programmatic access on top of that:
+
+- **Filtering and search** that WebFetch can't do (list active issues, filter by status/component)
+- **Multi-issue watching** for changes since a timestamp
+- **GitLab MR/branch lookup** across git.drupalcode.org
+- **Comment formatting** from markdown to drupal.org HTML
+- **Disk caching** (5-min TTL) and rate limiting to be kind to d.o infrastructure
+- **JSON output** for programmatic use
+
+No external dependencies, just Python 3.8+.
 
 ## Related tools
 
