@@ -11,10 +11,14 @@ Usage:
 
 import argparse
 import json
+import os
 import re
 import sys
 import time
 import urllib.request
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from _cache import cached_fetch_json
 import urllib.error
 from datetime import datetime, timedelta
 
@@ -160,9 +164,8 @@ def fetch_issue_changes(nid, since_dt):
             cid = comment_ref.get("id")
             if not cid:
                 continue
-            cdata = fetch_json(
-                f"https://www.drupal.org/api-d7/comment/{cid}.json"
-            )
+            comment_url = f"https://www.drupal.org/api-d7/comment/{cid}.json"
+            cdata = cached_fetch_json(comment_url, ttl=300)
             time.sleep(0.1)  # Rate limit: be kind to drupal.org.
             if cdata is None:
                 continue

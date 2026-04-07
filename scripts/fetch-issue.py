@@ -9,11 +9,15 @@ Usage:
 
 import argparse
 import json
+import os
 import sys
 import time
 import urllib.request
 import urllib.error
 from datetime import datetime
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+from _cache import cached_fetch_json
 
 ISSUE_STATUSES = {
     "1": "Active",
@@ -123,7 +127,10 @@ def fetch_issue(nid, comments_only=False):
         cid = comment_ref.get("id")
         if not cid:
             continue
-        cdata = fetch_json(f"https://www.drupal.org/api-d7/comment/{cid}.json")
+        comment_url = f"https://www.drupal.org/api-d7/comment/{cid}.json"
+        cdata = cached_fetch_json(comment_url, ttl=300)
+        if cdata is None:
+            continue
         time.sleep(0.1)  # Rate limit: be kind to drupal.org.
         comment_body = cdata.get("comment_body", {})
         if isinstance(comment_body, list):
