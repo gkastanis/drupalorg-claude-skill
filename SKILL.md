@@ -1,11 +1,11 @@
 ---
 name: drupal-org-api
-description: Fetch issues, comments, merge requests, and user activity from drupal.org and git.drupalcode.org. Use this skill whenever the user asks about a drupal.org issue (by number like #3583213), wants to check MR status, see who commented, check if someone pushed code, list open issues, look up what's assigned to a user, format a comment for posting, or check for changes across multiple issues. Also use when you need to look up drupal.org issue details yourself during a task. The drupal.org website returns 403 to direct page fetches, so these scripts use the JSON API instead.
+description: Fetch issues, comments, merge requests, and user activity from drupal.org and git.drupalcode.org. Use this skill when you need structured or filtered data from the drupal.org issue queue - listing issues by status, watching multiple issues for changes, checking MRs/branches on GitLab, looking up user assignments, or formatting comments. Also use for JSON output or when you need to process issue data programmatically. For simply reading a single issue page, WebFetch now works (claudebot was unblocked April 2026).
 ---
 
 # Drupal.org API
 
-drupal.org blocks direct page fetches (403). WebFetch will not work on drupal.org issue pages. Use these scripts instead.
+These scripts provide structured, cached, rate-limited access to the drupal.org JSON API and git.drupalcode.org GitLab API. For reading a single issue page, WebFetch works too (claudebot unblocked April 2026). Use these scripts when you need filtering, JSON output, multi-issue watching, or GitLab data.
 
 ## Fetch an issue with all comments
 
