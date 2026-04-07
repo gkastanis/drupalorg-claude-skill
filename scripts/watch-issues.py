@@ -160,37 +160,43 @@ def fetch_issue_changes(nid, since_dt):
     # Only fetch comments if the issue changed since our cutoff.
     new_comments = []
     if issue_changed:
-        for comment_ref in data.get("comments", []):
-            cid = comment_ref.get("id")
-            if not cid:
-                continue
-            comment_url = f"https://www.drupal.org/api-d7/comment/{cid}.json"
-            cdata = cached_fetch_json(comment_url, ttl=300)
-            time.sleep(0.1)  # Rate limit: be kind to drupal.org.
-            if cdata is None:
-                continue
+        # Single request for all comments (tip from marcus_johansson).
+        page = 0
+        while True:
+            comments_url = f"https://www.drupal.org/api-d7/comment.json?node={nid}&limit=100&page={page}"
+            cpage = cached_fetch_json(comments_url, ttl=300)
+            if cpage is None:
+                break
+            clist = cpage.get("list", [])
+            if not clist:
+                break
 
-            comment_created = ts_to_datetime(cdata.get("created", ""))
-            if comment_created is None or comment_created <= since_dt:
-                continue
+            for cdata in clist:
+                comment_created = ts_to_datetime(cdata.get("created", ""))
+                if comment_created is None or comment_created <= since_dt:
+                    continue
 
-            comment_body = cdata.get("comment_body", {})
-            if isinstance(comment_body, list):
-                comment_body = comment_body[0] if comment_body else {}
-            body_html = comment_body.get("value", "") if isinstance(comment_body, dict) else str(comment_body)
+                comment_body = cdata.get("comment_body", {})
+                if isinstance(comment_body, list):
+                    comment_body = comment_body[0] if comment_body else {}
+                body_html = comment_body.get("value", "") if isinstance(comment_body, dict) else str(comment_body)
 
-            # Skip auto-generated "created an issue" comments.
-            if "created an issue" in body_html and len(body_html) < 200:
-                continue
+                if "created an issue" in body_html and len(body_html) < 200:
+                    continue
 
-            body_text = strip_html(body_html)
-            new_comments.append({
-                "cid": cid,
-                "author": cdata.get("name", "unknown"),
-                "created": ts_to_date(cdata.get("created", "")),
-                "body": body_text,
-                "snippet": truncate(body_text),
-            })
+                body_text = strip_html(body_html)
+                new_comments.append({
+                    "cid": cdata.get("cid", ""),
+                    "author": cdata.get("name", "unknown"),
+                    "created": ts_to_date(cdata.get("created", "")),
+                    "body": body_text,
+                    "snippet": truncate(body_text),
+                })
+
+            if not cpage.get("next"):
+                break
+            page += 1
+            time.sleep(0.1)  # Rate limit between pages.
 
     return {
         "nid": nid,
