@@ -13,6 +13,7 @@ import argparse
 import json
 import re
 import sys
+import time
 import urllib.request
 import urllib.error
 from datetime import datetime, timedelta
@@ -162,6 +163,7 @@ def fetch_issue_changes(nid, since_dt):
             cdata = fetch_json(
                 f"https://www.drupal.org/api-d7/comment/{cid}.json"
             )
+            time.sleep(0.1)  # Rate limit: be kind to drupal.org.
             if cdata is None:
                 continue
 

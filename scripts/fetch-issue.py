@@ -10,6 +10,7 @@ Usage:
 import argparse
 import json
 import sys
+import time
 import urllib.request
 import urllib.error
 from datetime import datetime
@@ -123,6 +124,7 @@ def fetch_issue(nid, comments_only=False):
         if not cid:
             continue
         cdata = fetch_json(f"https://www.drupal.org/api-d7/comment/{cid}.json")
+        time.sleep(0.1)  # Rate limit: be kind to drupal.org.
         comment_body = cdata.get("comment_body", {})
         if isinstance(comment_body, list):
             comment_body = comment_body[0] if comment_body else {}
